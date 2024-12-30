@@ -1,55 +1,67 @@
 package cmd
 
 import (
-	"fmt"
-	"io/ioutil"
-	"os"
-	"path/filepath"
-	"time"
+    "encoding/json"
+    "fmt"
+    "os"
+    "path/filepath"
+
+    "myvcs/internal/objects"
 )
 
 func SaveCommit(message string) {
-	repoDir := ".vcs"
-	objectsDir := filepath.Join(repoDir, "objects")
-	stagingDir := filepath.Join(repoDir, "staging")
+    repoDir := ".vcs"
+    commitsDir := filepath.Join(repoDir, "commits")
 
-	if _, err := os.Stat(repoDir); os.IsNotExist(err) {
-		fmt.Println("Error: Repository not initialized. Run 'vcs start' first.")
-		return
-	}
+    // Vérifier si le répertoire .vcs existe
+    if _, err := os.Stat(repoDir); os.IsNotExist(err) {
+        fmt.Println("Error: Repository not initialized. Run 'vcs start' first.")
+        return
+    }
 
-	files, err := ioutil.ReadDir(stagingDir)
-	if err != nil {
-		fmt.Println("Error reading staging area:", err)
-		return
-	}
+    // Créer le répertoire des commits s'il n'existe pas
+    if _, err := os.Stat(commitsDir); os.IsNotExist(err) {
+        err = os.MkdirAll(commitsDir, 0755)
+        if err != nil {
+            fmt.Println("Error creating commits directory:", err)
+            return
+        }
+    }
 
-	commitID := fmt.Sprintf("%d", time.Now().UnixNano())
-	commitDir := filepath.Join(objectsDir, commitID)
-	os.MkdirAll(commitDir, 0755)
+    // Charger le dernier commit depuis HEAD pour obtenir le parent
+    headPath := filepath.Join(repoDir, "HEAD")
+    var parentHash string
+    if _, err := os.Stat(headPath); err == nil {
+        parentBytes, err := os.ReadFile(headPath)
+        if err == nil {
+            parentHash = string(parentBytes)
+        }
+    }
 
-	for _, file := range files {
-		src := filepath.Join(stagingDir, file.Name())
-		dst := filepath.Join(commitDir, file.Name())
+    // Créer un nouvel objet Commit
+    newCommit := objects.NewCommit(message, parentHash, nil)
 
-		content, err := ioutil.ReadFile(src)
-		if err != nil {
-			fmt.Println("Error reading file:", err)
-			continue
-		}
+    // Sérialiser le commit en JSON
+    commitJSON, err := json.MarshalIndent(newCommit, "", "  ")
+    if err != nil {
+        fmt.Println("Error marshalling commit to JSON:", err)
+        return
+    }
 
-		err = ioutil.WriteFile(dst, content, 0644)
-		if err != nil {
-			fmt.Println("Error writing file:", err)
-			continue
-		}
-	}
+    // Sauvegarder le commit dans un fichier
+    commitPath := filepath.Join(commitsDir, newCommit.Hash+".json")
+    err = os.WriteFile(commitPath, commitJSON, 0644)
+    if err != nil {
+        fmt.Println("Error saving commit file:", err)
+        return
+    }
 
-	commitMetadata := fmt.Sprintf("Commit: %s\nMessage: %s\nDate: %s\n", commitID, message, time.Now().Format(time.RFC1123))
-	ioutil.WriteFile(filepath.Join(objectsDir, commitID+".txt"), []byte(commitMetadata), 0644)
+    // Mettre à jour HEAD avec le nouveau hash du commit
+    err = os.WriteFile(headPath, []byte(newCommit.Hash), 0644)
+    if err != nil {
+        fmt.Println("Error updating HEAD:", err)
+        return
+    }
 
-	fmt.Println("Commit saved:", commitID)
-
-	os.RemoveAll(stagingDir)
-	os.MkdirAll(stagingDir, 0755)
+    fmt.Printf("Commit saved: %s\n", newCommit.Hash)
 }
