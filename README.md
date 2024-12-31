@@ -9,7 +9,7 @@
 - **Initialisation de Dépôt** : Configure un dépôt pour le suivi de versions.
 - **Ajout de Fichiers** : Sélectionne les fichiers à inclure dans le prochain commit.
 - **Commit des Changements** : Sauvegarde des modifications avec un message descriptif.
-- **Historique des Commits** : Visualise la chronologie des commits.
+- **Historique des Commits** : Visualise la chronologie des commits. 
 - **Gestion des Branches** : Liste et crée des branches.
 - **Clonage de Dépôt** : Clone un dépôt local existant.
 - **Statut** : Montre l'état actuel du dépôt.
