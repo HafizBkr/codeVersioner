@@ -3,21 +3,15 @@ package main
 import (
 	"fmt"
 	"os"
-
 	"myvcs/cmd"
 )
 
 func main() {
-	// Vérifier si des arguments sont passés
 	if len(os.Args) < 2 {
 		cmd.ShowHelp()
 		return
 	}
-
-	// Récupérer la commande principale
 	command := os.Args[1]
-
-	// Gestion des commandes
 	switch command {
 	case "start":
 		cmd.InitRepo()
@@ -42,7 +36,6 @@ func main() {
 			fmt.Println("Usage: vcs branch --list | --create <name>")
 			return
 		}
-		// Gestion des options pour les branches
 		switch os.Args[2] {
 		case "--list":
 			cmd.ListBranches()

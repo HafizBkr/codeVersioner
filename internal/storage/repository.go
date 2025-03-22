@@ -26,19 +26,19 @@ func InitRepo() {
 		"refs/heads",       // Sous-répertoire pour stocker les branches spécifiques
 	}
 
-	// Vérifier si le dépôt est déjà initialisé
+
 	if _, err := os.Stat(repoDir); !os.IsNotExist(err) {
 		fmt.Println("Repository already initialized.")
 		return
 	}
 
-	// Créer le répertoire principal du dépôt .vcs
+
 	if err := os.Mkdir(repoDir, 0755); err != nil {
 		fmt.Println("Error initializing repository:", err)
 		return
 	}
 
-	// Créer les sous-répertoires nécessaires
+
 	for _, subDir := range subDirs {
 		dirPath := filepath.Join(repoDir, subDir)
 		if err := os.MkdirAll(dirPath, 0755); err != nil {
@@ -47,7 +47,7 @@ func InitRepo() {
 		}
 	}
 
-	// Créer le fichier HEAD par défaut pointant vers la branche "main"
+
 	headFile := filepath.Join(repoDir, "HEAD")
 	defaultBranch := "refs/heads/main"
 	if err := os.WriteFile(headFile, []byte(defaultBranch), 0644); err != nil {
@@ -55,7 +55,7 @@ func InitRepo() {
 		return
 	}
 
-	// Créer la branche "main" dans le répertoire refs/heads
+
 	mainBranchFile := filepath.Join(repoDir, "refs/heads/main")
 	if err := os.WriteFile(mainBranchFile, []byte(""), 0644); err != nil {
 		fmt.Println("Error creating main branch file:", err)
@@ -94,7 +94,6 @@ func (r *Repository) Commit(message string) (*objects.Commit, error) {
     r.Objects[commit.Hash] = commit
     r.Head = commit.Hash
 
-    // Mettre à jour la branche active (HEAD) pour pointer sur le dernier commit
     headFile := filepath.Join(r.Path, ".vcs/HEAD")
     err := ioutil.WriteFile(headFile, []byte("refs/heads/main"), 0644)
     if err != nil {
@@ -106,21 +105,18 @@ func (r *Repository) Commit(message string) (*objects.Commit, error) {
     return commit, nil
 }
 
-// Fonction pour créer une branche
+
 func (r *Repository) CreateBranch(name string) error {
-    // Vérifier si la branche existe déjà
     branchFile := filepath.Join(r.Path, ".vcs/refs/heads", name)
     if _, err := os.Stat(branchFile); err == nil {
         return fmt.Errorf("branch '%s' already exists", name)
     }
 
-    // Créer la nouvelle branche
     err := ioutil.WriteFile(branchFile, []byte(""), 0644)
     if err != nil {
         return fmt.Errorf("error creating branch: %w", err)
     }
 
-    // Mettre à jour HEAD pour pointer vers la nouvelle branche
     headFile := filepath.Join(r.Path, ".vcs/HEAD")
     err = ioutil.WriteFile(headFile, []byte("refs/heads/"+name), 0644)
     if err != nil {

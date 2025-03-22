@@ -1,4 +1,3 @@
-// internal/objects/commit.go
 package objects
 
 import (
@@ -15,7 +14,7 @@ type Commit struct {
     Message   string
     Timestamp time.Time
     Parent    string
-    Files     map[string]string // filename -> content hash 
+    Files     map[string]string 
 }
 
 func NewCommit(message string, parent string, files map[string]string) *Commit {
@@ -32,15 +31,13 @@ func NewCommit(message string, parent string, files map[string]string) *Commit {
     
     return commit
 }
-// LoadCommit lit et désérialise un fichier commit en structure Commit
+
 func LoadCommit(path string) (*Commit, error) {
-	// Lire le fichier commit
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("could not read commit file: %v", err)
 	}
 
-	// Désérialiser les données en structure Commit
 	var commit Commit
 	if err := json.Unmarshal(data, &commit); err != nil {
 		return nil, fmt.Errorf("could not unmarshal commit: %v", err)
