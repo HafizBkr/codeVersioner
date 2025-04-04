@@ -150,6 +150,6 @@ Les contributions sont encouragées ! Voici comment contribuer :
 **Votre Nom**  
 - GitHub : ((https://github.com/HafizBkr))  
 - Email : hafizinovus@gmail.com
-
+- Name :Hafiz BOUKARI
 N'hésitez pas à poser des questions ou à proposer des améliorations. 🚀
 
